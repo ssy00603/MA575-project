@@ -1,0 +1,56 @@
+---
+title: "lab6 deliverable"
+author: "Siyu Shen"
+date: "10/21/2019"
+output: html_document
+---
+
+```{r q0}
+# read data of "Foreset Fire" and clean it
+forestfire <- read.csv("forestfires.csv")
+FFMC = as.numeric(as.character(forestfire$FFMC))
+DMC = as.numeric(as.character(forestfire$DMC))
+DC = as.numeric(as.character(forestfire$DC))
+ISI = as.numeric(as.character(forestfire$ISI))
+Temperature = as.numeric(as.character(forestfire$temp))
+RH = as.numeric(as.character(forestfire$RH))
+Wind = as.numeric(as.character(forestfire$wind))
+Rain = as.numeric(as.character(forestfire$rain))
+area = as.numeric(as.character(forestfire$area))
+isidataset <- data.frame(FFMC, Rain, Temperature, RH, Wind,ISI)
+rm(ISI, FFMC, Rain, Temperature, RH, Wind)
+Datasets <- isidataset[complete.cases(isidataset),]
+attach(Datasets)
+```
+
+```{r q1}
+# Create a scatter plot matrix of (Y,X1,X2,...,Xp)
+library(carData)
+library(car)
+pairs(~ISI + Temperature + RH + Wind + Rain + FFMC, data = Datasets, gap=0.5)
+```
+
+```{r q2}
+# Create a correlation matrix
+X <- cbind(Temperature, RH , Wind , Rain , FFMC)
+c <- cor(X)
+round(c,6)
+
+m.mls <- lm(ISI~Temperature + RH + Wind + Rain + FFMC)
+m.quartls <- lm(ISI ~ Temperature + I(Temperature^2) + I(Temperature^3) + I(Temperature^4))
+summary(m.mls)
+```
+
+```{r q3}
+# Plot the standarized residuals of the model
+StanResForestMLS <- rstandard(m.mls)
+StanResForestQuar <- rstandard(m.quartls)
+par(mfrow=c(1,1))
+plot(ISI,StanResForestMLS,xlab = "Initial Spread Index", ylab = "Standardized Residuals",col = "red")
+points(ISI,StanResForestQuar,xlab ="Initial Spread Index", ylab ="Standardized Residuals", col = "blue")
+
+abline(h=2,lty=2)
+abline(h=-2,lty=2)
+
+legend(30, 4, legend=c("MLS","Quartic LS"), col=c("red","blue"), lty=1, cex=1, pch=19)
+```
